@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GNS 301</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  
+<style>
+  /* Elegant + Warm Font Pairing */
+  @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@400;500;600&display=swap');
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #FAF7F2; /* warm paper tone */
+    color: #2C2C2C; /* deep ink */
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .quiz-box {
+    background: #FFFFFF;
+    width: 95%;
+    max-width: 650px;
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    border: 1px solid #EAE6DF;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 12px;
+    font-family: 'Libre Baskerville', serif;
+    font-weight: 700;
+    color: #1E1E1E;
+    letter-spacing: 0.4px;
+  }
+
+  .counter {
+    text-align: center;
+    font-size: 14px;
+    color: #7A7A7A;
+    margin-bottom: 22px;
+  }
+
+  .question {
+    font-size: 19px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    color: #2C2C2C;
+    line-height: 1.75;
+  }
+
+  .options button {
+    width: 100%;
+    padding: 15px;
+    margin: 10px 0;
+    background: #F3EFE8; /* soft journal tone */
+    border: 1px solid #E0DBD2;
+    border-radius: 16px;
+    color: #2C2C2C;
+    text-align: left;
+    cursor: pointer;
+    font-size: 15px;
+    transition: all 0.2s ease;
+  }
+
+  .options button:hover {
+    background: #E8E1D7;
+    border-color: #C08457; /* muted terracotta accent */
+  }
+
+  .options button.correct {
+    background: #DDE5D3; /* soft olive */
+    border-color: #6B8E23;
+    color: #1F2A1F;
+  }
+
+  .options button.wrong {
+    background: #F2D7D5; /* muted warm red */
+    border-color: #B94A48;
+    color: #4A1F1F;
+  }
+
+  .nav-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .nav-buttons button {
+    flex: 1;
+    padding: 14px;
+    background: #C08457; /* premium warm accent */
+    border: none;
+    border-radius: 16px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .nav-buttons button:disabled {
+    background: #D7CFC3;
+    color: #8A8175;
+    cursor: not-allowed;
+  }
+
+  .nav-buttons button:hover:not(:disabled) {
+    background: #A5663C;
+  }
+
+  .restart-btn {
+    margin-top: 24px;
+    width: 100%;
+    padding: 15px;
+    background: #2F3E2F; /* deep olive ink */
+    border: none;
+    border-radius: 16px;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .restart-btn:hover {
+    background: #1F2A1F;
+  }
+
+  .result {
+    text-align: center;
+    font-size: 19px;
+    margin-top: 24px;
+    font-weight: 600;
+    color: #2C2C2C;
+  }
+  
+  .target {
+  border-bottom: 2px solid #C08457;
+  padding-bottom: 2px;
+  font-weight: 600;
+}
+
+
+</style>
+</head>
+<body>
+
+<div class="quiz-box">
+  <h1>GNS 301 Quiz</h1>
+  <div class="counter" id="counter"></div>
+
+  <div class="question" id="question"></div>
+  <div class="options" id="options"></div>
+
+  <div class="nav-buttons">
+    <button id="prevBtn">Previous</button>
+    <button id="nextBtn">Next</button>
+  </div>
+
+  <div class="result" id="result" style="display:none;"></div>
+
+<button class="restart-btn" id="restartBtn" style="display:none;">Restart Quiz</button>
+</div>
+
+<script>
+const quizData = [
+ {
+  q: "A sentence that expresses a complete thought is known as:",
+  o: [
+    "A phrase",
+    "A clause",
+    "An independent clause",
+    "A fragment"
+  ],
+  a: 2
+},
+{
+  q: "Which of the following is a compound sentence?",
+  o: [
+    "She went home because she was tired.",
+    "She went home, and she slept immediately.",
+    "Going home early.",
+    "Because she was tired."
+  ],
+  a: 1
+},
+{
+  q: "A group of words that contains a subject and a verb but does not express a complete thought is:",
+  o: [
+    "A phrase",
+    "A dependent clause",
+    "An independent clause",
+    "A sentence"
+  ],
+  a: 1
+},
+{
+  q: "Identify the adverbial clause in the sentence: 'I will call you when I arrive.'",
+  o: [
+    "I will call you",
+    "When I arrive",
+    "Call you",
+    "I arrive"
+  ],
+  a: 1
+},
+{
+  q: "Which of the following is a noun phrase?",
+  o: [
+    "Running fast",
+    "The tall young man",
+    "Very quickly",
+    "Because he left"
+  ],
+  a: 1
+},
+{
+  q: "A simple sentence contains:",
+  o: [
+    "Two independent clauses",
+    "One independent clause",
+    "One dependent clause only",
+    "Two dependent clauses"
+  ],
+  a: 1
+},
+{
+  q: "In essay writing, the thesis statement is usually found in the:",
+  o: [
+    "Conclusion",
+    "Body paragraph",
+    "Introduction",
+    "Title"
+  ],
+  a: 2
+},
+{
+  q: "Which of the following is not a type of essay?",
+  o: [
+    "Narrative",
+    "Descriptive",
+    "Persuasive",
+    "Algorithmic"
+  ],
+  a: 3
+},
+{
+  q: "A paragraph should ideally contain:",
+  o: [
+    "Only one central idea",
+    "Many unrelated ideas",
+    "No topic sentence",
+    "Only examples"
+  ],
+  a: 0
+},
+{
+  q: "The sentence 'If I had studied, I would have passed' is an example of:",
+  o: [
+    "First conditional",
+    "Second conditional",
+    "Third conditional",
+    "Zero conditional"
+  ],
+  a: 2
+},
+{
+  q: "A phrase differs from a clause because a phrase:",
+  o: [
+    "Contains a subject and verb",
+    "Expresses a complete thought",
+    "Does not contain both subject and predicate",
+    "Always begins with a conjunction"
+  ],
+  a: 2
+},
+{
+  q: "Identify the literary device in: 'The wind whispered through the trees.'",
+  o: [
+    "Metaphor",
+    "Personification",
+    "Simile",
+    "Hyperbole"
+  ],
+  a: 1
+},
+{
+  q: "A story that teaches a moral lesson is called:",
+  o: [
+    "A satire",
+    "A fable",
+    "A sonnet",
+    "An epic"
+  ],
+  a: 1
+},
+
+//Next batch
+{
+  q: "The climax of a story refers to:",
+  o: [
+    "The introduction of characters",
+    "The highest point of tension",
+    "The moral lesson",
+    "The setting"
+  ],
+  a: 1
+},
+{
+  q: "Which sentence is grammatically correct?",
+  o: [
+    "She don't like rice.",
+    "She doesn't likes rice.",
+    "She doesn't like rice.",
+    "She not like rice."
+  ],
+  a: 2
+},
+{
+  q: "A complex sentence contains:",
+  o: [
+    "One independent clause and at least one dependent clause",
+    "Two independent clauses only",
+    "No clause",
+    "Only phrases"
+  ],
+  a: 0
+},
+{
+  q: "The sentence 'Running down the street, the bus was missed by John' contains:",
+  o: [
+    "A correct modifier",
+    "A dangling modifier",
+    "An adjective clause",
+    "A compound verb"
+  ],
+  a: 1
+},
+{
+  q: "Which of the following is a coordinating conjunction?",
+  o: [
+    "Because",
+    "Although",
+    "And",
+    "Since"
+  ],
+  a: 2
+},
+{
+  q: "An argumentative essay is primarily written to:",
+  o: [
+    "Entertain",
+    "Describe",
+    "Persuade",
+    "Narrate events"
+  ],
+  a: 2
+},
+{
+  q: "The repetition of initial consonant sounds is known as:",
+  o: [
+    "Assonance",
+    "Alliteration",
+    "Onomatopoeia",
+    "Irony"
+  ],
+  a: 1
+},
+{
+  q: "Identify the independent clause in the sentence below: <span class='target' >Although it was raining</span>, we continued the match.",
+  o: [
+    "Although it was raining",
+    "It was raining",
+    "We continued the match",
+    "Raining"
+  ],
+  a: 2
+},
+{
+  q: "In the sentence below, what is the function of the underlined clause? The boy <span class='target' >who won the prize</span> is my brother.",
+  o: [
+    "Noun clause",
+    "Adverbial clause",
+    "Adjective clause",
+    "Independent clause"
+  ],
+  a: 2
+},
+{
+  q: "Which of the following is an independent clause?",
+  o: [
+    "Because she was late",
+    "When he arrives",
+    "She completed the assignment",
+    "After the meeting"
+  ],
+  a: 2
+},
+{
+  q: "In the sentence below, what is the function of the underlined clause? <span class='target' >What he said</span> surprised everyone.",
+  o: [
+    "Adverbial clause",
+    "Noun clause",
+    "Adjective clause",
+    "Phrase"
+  ],
+  a: 1
+},
+{
+  q: "What is the grammatical name of the underlined expression in the sentence below? She ran <span class='target' >very quickly</span>.",
+  o: [
+    "Noun phrase",
+    "Verb phrase",
+    "Adverbial phrase",
+    "Adjective phrase"
+  ],
+  a: 2
+},
+{
+  q: "Choose the correct reported speech: He said, 'I am tired.'",
+  o: [
+    "He said he is tired.",
+    "He said he was tired.",
+    "He said I am tired.",
+    "He said he has tired."
+  ],
+  a: 1
+},
+{
+  q: "Which sentence is correctly punctuated?",
+  o: [
+    "However she tried she failed.",
+    "However, she tried she failed.",
+    "However, she tried, she failed.",
+    "However she tried, she failed."
+  ],
+  a: 2
+},
+{
+  q: "In the sentence below, what is the function of the underlined phrase? The man <span class='target' >in the blue shirt</span> is my uncle.",
+  o: [
+    "Adverbial phrase",
+    "Noun phrase",
+    "Adjective phrase",
+    "Verb phrase"
+  ],
+  a: 2
+},
+{
+  q: "A topic sentence in a paragraph serves to:",
+  o: [
+    "Conclude the essay",
+    "Introduce the main idea of the paragraph",
+    "Provide examples only",
+    "Summarize the whole essay"
+  ],
+  a: 1
+},
+{
+  q: "Identify the figure of speech in: He is as brave as a lion.",
+  o: [
+    "Metaphor",
+    "Simile",
+    "Irony",
+    "Personification"
+  ],
+  a: 1
+},
+{
+  q: "Which of the following is a compound-complex sentence?",
+  o: [
+    "She sings.",
+    "She sings and dances.",
+    "Although she was tired, she sang and she danced.",
+    "Because she was tired."
+  ],
+  a: 2
+},
+{
+  q: "In the sentence below, what type of clause is the underlined expression? <span class='target' >If you work hard</span>, you will succeed.",
+  o: [
+    "Independent clause",
+    "Noun clause",
+    "Adverbial clause",
+    "Adjective clause"
+  ],
+  a: 2
+},
+{
+  q: "What is the grammatical function of the underlined expression in the sentence below? She hopes <span class='target' >to win the prize</span>.",
+  o: [
+    "Adverbial phrase",
+    "Noun phrase functioning as object",
+    "Adjective phrase",
+    "Independent clause"
+  ],
+  a: 1
+},
+
+//Next batch
+{
+  q: "Which sentence contains a dangling modifier?",
+  o: [
+    "Walking along the road, I saw a dog.",
+    "Walking along the road, the dog barked loudly.",
+    "I saw a dog walking along the road.",
+    "The dog was walking."
+  ],
+  a: 1
+},
+{
+  q: "In literature, the setting of a story refers to:",
+  o: [
+    "The main character",
+    "The time and place of the story",
+    "The moral lesson",
+    "The conflict"
+  ],
+  a: 1
+},
+{
+  q: "Which of the following shows correct subject-verb agreement?",
+  o: [
+    "The list of items are on the table.",
+    "The list of items is on the table.",
+    "The list of items were on the table.",
+    "The list of items be on the table."
+  ],
+  a: 1
+},
+{
+  q: "In 'She bought bread, milk, and eggs,' the comma before 'and' is known as:",
+  o: [
+    "Introductory comma",
+    "Serial comma",
+    "Misplaced comma",
+    "Fragment comma"
+  ],
+  a: 1
+},
+{
+  q: "Which of the following is a noun clause?",
+  o: [
+    "After the show",
+    "Because he left",
+    "What you said",
+    "Running fast"
+  ],
+  a: 2
+},
+{
+  q: "An effective conclusion paragraph should:",
+  o: [
+    "Introduce new arguments",
+    "Repeat the introduction word for word",
+    "Summarize main points and restate thesis",
+    "Contain examples only"
+  ],
+  a: 2
+},
+{
+  q: "The sentence 'The more you read, the wiser you become' is an example of:",
+  o: [
+    "Simple sentence",
+    "Comparative structure",
+    "Fragment",
+    "Indirect speech"
+  ],
+  a: 1
+},
+{
+  q: "In the sentence below, what is the function of the underlined clause? I know <span class='target'>that he is honest</span>.",
+  o: [
+    "Adjective clause functioning as modifier",
+    "Noun clause functioning as object",
+    "Adverbial clause of reason",
+    "Independent clause"
+  ],
+  a: 1
+},
+{
+  q: "Identify the grammatical name and function of the underlined clause in the sentence below: The man <span class='target'>who came yesterday</span> is here.",
+  o: [
+    "Noun clause functioning as subject",
+    "Adverbial clause modifying 'man'",
+    "Adjective clause modifying 'man'",
+    "Independent clause"
+  ],
+  a: 2
+},
+{
+  q: "In the sentence below, what type of clause is the underlined expression? <span class='target'>When the bell rang</span>, the students left.",
+  o: [
+    "Noun clause functioning as object",
+    "Adjective clause modifying 'students'",
+    "Adverbial clause of time",
+    "Independent clause"
+  ],
+  a: 2
+},
+{
+  q: "In the sentence below, what is the function of the underlined clause? <span class='target'>What she cooked</span> tastes delicious.",
+  o: [
+    "Adjective clause",
+    "Adverbial clause",
+    "Noun clause functioning as subject",
+    "Phrase"
+  ],
+  a: 2
+},
+{
+  q: "In the sentence below, what type of clause is the underlined expression? He stayed home <span class='target'>because he was ill</span>.",
+  o: [
+    "Noun clause functioning as object",
+    "Adjective clause modifying 'home'",
+    "Adverbial clause of reason",
+    "Independent clause"
+  ],
+  a: 2
+},
+{
+  q: "In the sentence 'The book that you gave me is interesting,' the clause 'that you gave me' modifies:",
+  o: [
+    "Book",
+    "Interesting",
+    "Me",
+    "Gave"
+  ],
+  a: 0
+},
+{
+  q: "In the sentence below, identify the dependent clause: She will succeed if she works hard.",
+  o: [
+    "She will succeed",
+    "Works hard",
+    "If she works hard",
+    "She works"
+  ],
+  a: 2
+},
+{
+  q: "Identify the clause type in the sentence below: <span class='target'>Where he lives</span> is unknown.",
+  o: [
+    "Adverbial clause",
+    "Adjective clause",
+    "Noun clause functioning as subject",
+    "Independent clause"
+  ],
+  a: 2
+},
+{
+  q: "In the sentence below, what type of clause is the underlined expression? I met the girl <span class='target'>whose father is a doctor</span>.",
+  o: [
+    "Noun clause",
+    "Adverbial clause",
+    "Adjective clause modifying 'girl'",
+    "Independent clause"
+  ],
+  a: 2
+},
+{
+  q: "The clause 'although he tried' in 'Although he tried, he failed' expresses:",
+  o: [
+    "Reason",
+    "Time",
+    "Condition",
+    "Concession"
+  ],
+  a: 3
+},
+{
+  q: "In the sentence below, what is the function of the underlined clause? Tell me <span class='target'>what you want</span>.",
+  o: [
+    "Noun clause functioning as object",
+    "Adjective clause",
+    "Adverbial clause",
+    "Phrase"
+  ],
+  a: 0
+},
+{
+  q: "Which of the following introduces an adjective clause?",
+  o: [
+    "Because",
+    "If",
+    "Which",
+    "Although"
+  ],
+  a: 2
+},
+{
+  q: "In the sentence below, what type of clause is the underlined expression? He behaves <span class='target'>as if he owns the place</span>.",
+  o: [
+    "Noun clause",
+    "Adverbial clause of manner",
+    "Adjective clause",
+    "Independent clause"
+  ],
+  a: 1
+},
+{
+  q: "In the sentence below, what is the function of the underlined clause? It is true <span class='target'>that the earth is round</span>.",
+  o: [
+    "Noun clause complement",
+    "Adjective clause",
+    "Adverbial clause",
+    "Independent clause"
+  ],
+  a: 0
+},
+{
+  q: "In the sentence 'The day when we met was memorable,' the clause 'when we met' modifies:",
+  o: [
+    "Memorable",
+    "Day",
+    "We",
+    "Met"
+  ],
+  a: 1
+},
+{
+  q: "Identify the function of the underlined expression in the sentence below: She studied hard <span class='target'>to pass the exam</span>.",
+  o: [
+    "Noun phrase as object",
+    "Adjective phrase",
+    "Adverbial phrase of purpose",
+    "Independent clause"
+  ],
+  a: 2
+},
+{
+  q: "In the sentence below, what is the function of the underlined clause? <span class='target'>Whoever wins the race</span> will receive a prize.",
+  o: [
+    "Adjective clause",
+    "Adverbial clause",
+    "Noun clause functioning as subject",
+    "Phrase"
+  ],
+  a: 2
+},
+{
+  q: "The clause 'while I was sleeping' in 'The phone rang while I was sleeping' indicates:",
+  o: [
+    "Reason",
+    "Time",
+    "Condition",
+    "Purpose"
+  ],
+  a: 1
+},
+{
+  q: "In the sentence below, what type of clause is the underlined expression? This is the house <span class='target'>where I was born</span>.",
+  o: [
+    "Adjective clause modifying 'house'",
+    "Noun clause",
+    "Adverbial clause",
+    "Independent clause"
+  ],
+  a: 0
+},
+{
+  q: "Which of the following is a noun clause?",
+  o: [
+    "Because she was late",
+    "When he arrives",
+    "That you are coming",
+    "Running quickly"
+  ],
+  a: 2
+},
+{
+  q: "Identify the grammatical function of the underlined expression in the sentence below: <span class='target'>Having completed the task</span>, she left the office.",
+  o: [
+    "Noun phrase functioning as subject",
+    "Adverbial participial phrase modifying 'she'",
+    "Adjective phrase modifying 'task'",
+    "Independent clause"
+  ],
+  a: 1
+},
+{
+  q: "Choose the sentence that is grammatically correct.",
+  o: [
+    "Neither of the boys have finished.",
+    "Neither of the boys has finished.",
+    "Neither of the boys were finished.",
+    "Neither of the boys are finishing."
+  ],
+  a: 1
+},
+
+//Next batch
+{
+  q: "In 'Scarcely had he arrived when the meeting began,' the sentence structure is an example of:",
+  o: [
+    "Normal word order",
+    "Inversion for emphasis",
+    "Fragment structure",
+    "Passive construction"
+  ],
+  a: 1
+},
+{
+  q: "Identify the error in: 'The committee have made its decision.'",
+  o: [
+    "Tense error",
+    "Subject-verb disagreement",
+    "Pronoun agreement error",
+    "No error"
+  ],
+  a: 2
+},
+{
+  q: "Choose the correct option: 'It is high time we ____ home.'",
+  o: [
+    "go",
+    "went",
+    "are going",
+    "have gone"
+  ],
+  a: 1
+},
+{
+  q: "In literature, dramatic irony occurs when:",
+  o: [
+    "The character knows more than the audience",
+    "The audience knows more than the character",
+    "Both know the same information",
+    "The narrator is absent"
+  ],
+  a: 1
+},
+{
+  q: "Identify the function of the underlined expression in the sentence below: She claims <span class='target'>to have been informed earlier</span>.",
+  o: [
+    "Noun phrase functioning as object complement",
+    "Adverbial phrase of time",
+    "Adjective phrase",
+    "Independent clause"
+  ],
+  a: 0
+},
+{
+  q: "Which sentence contains a misplaced modifier?",
+  o: [
+    "She almost drove her kids to school every day.",
+    "She drove her kids to school almost every day.",
+    "She drove her kids almost to school every day.",
+    "She drove almost her kids to school every day."
+  ],
+  a: 0
+},
+{
+  q: "In 'No sooner had the show started than it began to rain,' the structure expresses:",
+  o: [
+    "Comparison",
+    "Condition",
+    "Immediate sequence",
+    "Cause"
+  ],
+  a: 2
+},
+{
+  q: "Identify the clause type in the sentence below: <span class='target'>Whatever you decide</span> will be accepted.",
+  o: [
+    "Adjective clause",
+    "Adverbial clause",
+    "Noun clause functioning as subject",
+    "Independent clause"
+  ],
+  a: 2
+},
+{
+  q: "Choose the correct form: 'He speaks as though he ____ everything.'",
+  o: [
+    "knows",
+    "knew",
+    "has known",
+    "knowing"
+  ],
+  a: 1
+},
+{
+  q: "The sentence 'Hardly had she spoken when the lights went out' illustrates:",
+  o: [
+    "Conditional clause",
+    "Inversion",
+    "Relative clause",
+    "Direct speech"
+  ],
+  a: 1
+},
+{
+  q: "Identify the function of the underlined expression in the sentence below: He performed <span class='target'>beyond what was expected</span>.",
+  o: [
+    "Noun clause",
+    "Adverbial phrase of degree",
+    "Adjective clause",
+    "Independent clause"
+  ],
+  a: 1
+},
+{
+  q: "Which sentence is in the passive voice?",
+  o: [
+    "They completed the project.",
+    "The project was completed on time.",
+    "They are completing the project.",
+    "They will complete the project."
+  ],
+  a: 1
+},
+{
+  q: "Choose the correct option: 'She would rather you ____ tomorrow.'",
+  o: [
+    "come",
+    "came",
+    "are coming",
+    "will come"
+  ],
+  a: 1
+},
+{
+  q: "In essay writing, coherence refers to:",
+  o: [
+    "Correct spelling only",
+    "Logical flow of ideas",
+    "Use of long sentences",
+    "Number of paragraphs"
+  ],
+  a: 1
+},
+{
+  q: "Identify the grammatical name of the underlined expression in the sentence below: <span class='target'>Despite the rain</span>, the match continued.",
+  o: [
+    "Adverbial phrase of concession",
+    "Noun clause",
+    "Adjective clause",
+    "Verb phrase"
+  ],
+  a: 0
+},
+{
+  q: "Which of the following sentences contains a split infinitive?",
+  o: [
+    "She decided to carefully examine the file.",
+    "She decided carefully to examine the file.",
+    "She carefully decided to examine the file.",
+    "She decided examining the file."
+  ],
+  a: 0
+},
+{
+  q: "Identify the error in: 'Each of the players have received their award.'",
+  o: [
+    "Tense error",
+    "Subject-verb disagreement",
+    "Article error",
+    "No error"
+  ],
+  a: 1
+},
+{
+  q: "The expression 'The classroom was a zoo' is an example of:",
+  o: [
+    "Simile",
+    "Hyperbole",
+    "Metaphor",
+    "Irony"
+  ],
+  a: 2
+},
+{
+  q: "Identify the independent clause in the sentence: 'Though he was tired, he completed the assignment before midnight.'",
+  o: [
+    "Though he was tired",
+    "He was tired",
+    "He completed the assignment before midnight",
+    "Before midnight"
+  ],
+  a: 2
+},
+{
+  q: "Choose the correct option: 'The news ____ shocking to everyone.'",
+  o: [
+    "were",
+    "are",
+    "was",
+    "have been"
+  ],
+  a: 2
+},
+{
+  q: "In the sentence below, what type of clause is the underlined expression? The teacher, <span class='target'>who was angry</span>, left the classroom.",
+  o: [
+    "Noun clause",
+    "Adverbial clause",
+    "Adjective clause",
+    "Independent clause"
+  ],
+  a: 2
+},
+{
+  q: "Select the sentence that is grammatically correct.",
+  o: [
+    "She has less friends than I do.",
+    "She has fewer friends than I do.",
+    "She has lesser friends than I do.",
+    "She has fewest friends than I do."
+  ],
+  a: 1
+},
+{
+  q: "The expression 'Break the ice' means:",
+  o: [
+    "Destroy something cold",
+    "Begin a conversation in a social situation",
+    "Start a fight",
+    "End a meeting"
+  ],
+  a: 1
+},
+{
+  q: "In essay writing, a good introduction should:",
+  o: [
+    "Contain unrelated examples",
+    "Introduce the topic and present a thesis",
+    "Present only statistics",
+    "Repeat the conclusion"
+  ],
+  a: 1
+},
+{
+  q: "Choose the correct reported speech: She said, 'I will attend the meeting.'",
+  o: [
+    "She said she will attend the meeting.",
+    "She said she would attend the meeting.",
+    "She said I will attend the meeting.",
+    "She said she attends the meeting."
+  ],
+  a: 1
+},
+{
+  q: "Which of the following is a complex sentence?",
+  o: [
+    "She cooked and cleaned.",
+    "She cooked the meal.",
+    "Although she was tired, she cooked the meal.",
+    "She cooked; she cleaned."
+  ],
+  a: 2
+},
+{
+  q: "Identify the grammatical function of the underlined expression in the sentence below: He studied hard <span class='target'>to improve his grades</span>.",
+  o: [
+    "Noun phrase functioning as subject",
+    "Adverbial phrase of purpose",
+    "Adjective phrase",
+    "Independent clause"
+  ],
+  a: 1
+},
+{
+  q: "Choose the correct option: 'Neither the students nor the teacher ____ present.'",
+  o: [
+    "were",
+    "are",
+    "was",
+    "have been"
+  ],
+  a: 2
+},
+{
+  q: "The repetition of vowel sounds within nearby words is known as:",
+  o: [
+    "Alliteration",
+    "Assonance",
+    "Metaphor",
+    "Irony"
+  ],
+  a: 1
+},
+{
+  q: "In the sentence below, what is the function of the underlined phrase? The book <span class='target'>on the table</span> belongs to me.",
+  o: [
+    "Adverbial phrase",
+    "Noun phrase",
+    "Adjective phrase modifying 'book'",
+    "Verb phrase"
+  ],
+  a: 2
+},
+{
+  q: "Select the sentence with correct subject-verb agreement.",
+  o: [
+    "Each of the girls have submitted their assignment.",
+    "Each of the girls has submitted her assignment.",
+    "Each of the girls have submitted her assignment.",
+    "Each of the girls has submitted their assignment."
+  ],
+  a: 1
+},
+{
+  q: "In literature, a character who opposes the protagonist is called:",
+  o: [
+    "Hero",
+    "Narrator",
+    "Antagonist",
+    "Audience"
+  ],
+  a: 2
+},
+{
+  q: "Choose the correct option: 'She insisted that he ____ immediately.'",
+  o: [
+    "leaves",
+    "left",
+    "leave",
+    "has left"
+  ],
+  a: 2
+},
+{
+  q: "Identify the type of clause in the sentence: 'Because he was careless, he lost the contract.'",
+  o: [
+    "Noun clause",
+    "Adverbial clause of reason",
+    "Adjective clause",
+    "Independent clause"
+  ],
+  a: 1
+},
+{
+  q: "The main purpose of a narrative essay is to:",
+  o: [
+    "Argue a point",
+    "Describe an object only",
+    "Tell a story",
+    "Analyze data"
+  ],
+  a: 2
+},
+{
+  q: "Choose the correct option: 'She is one of the best students who ____ passed the examination.'",
+  o: [
+    "has",
+    "have",
+    "is",
+    "was"
+  ],
+  a: 1
+},
+{
+  q: "Identify the error in: 'The information are not accurate.'",
+  o: [
+    "Tense error",
+    "Subject-verb disagreement",
+    "Article error",
+    "No error"
+  ],
+  a: 1
+},
+{
+  q: "The phrase 'once in a blue moon' means:",
+  o: [
+    "Very frequently",
+    "At night",
+    "Rarely",
+    "Immediately"
+  ],
+  a: 2
+},
+{
+  q: "What type of sentence is the following? 'Get out!'",
+  o: [
+    "Exclamatory sentence",
+    "Imperative sentence",
+    "Both imperative and exclamatory sentence",
+    "None of the above"
+  ],
+  a: 1
+},
+{
+  q: "What type of sentence is the following? 'What a beautiful day it is!'",
+  o: [
+    "Declarative sentence",
+    "Interrogative sentence",
+    "Exclamatory sentence",
+    "Imperative sentence"
+  ],
+  a: 2
+},
+{
+  q: "Identify the type of sentence: 'Can you solve this problem?'",
+  o: [
+    "Declarative sentence",
+    "Interrogative sentence",
+    "Imperative sentence",
+    "Exclamatory sentence"
+  ],
+  a: 1
+},
+{
+  q: "What kind of sentence is this? 'She completed the assignment before the deadline.'",
+  o: [
+    "Declarative sentence",
+    "Interrogative sentence",
+    "Imperative sentence",
+    "Exclamatory sentence"
+  ],
+  a: 0
+},
+{
+  q: "Identify the sentence type: 'Please close the door.'",
+  o: [
+    "Declarative sentence",
+    "Exclamatory sentence",
+    "Imperative sentence",
+    "Interrogative sentence"
+  ],
+  a: 2
+}
+]
+
+
+let current = 0;
+let score = 0;
+
+// ✅ Pick 60 random questions WITHOUT modifying quizData
+function pickRandomQuestions(bank, count) {
+  const copy = [...bank];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy.slice(0, count);
+}
+
+const examData = pickRandomQuestions(quizData, 60);
+
+let answers = new Array(examData.length).fill(null);
+let shuffledOptions = new Array(examData.length).fill(null);
+
+const questionEl = document.getElementById("question");
+const optionsEl = document.getElementById("options");
+const nextBtn = document.getElementById("nextBtn");
+const prevBtn = document.getElementById("prevBtn");
+const counterEl = document.getElementById("counter");
+const resultEl = document.getElementById("result");
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function loadQuestion() {
+  const q = examData[current];
+
+  counterEl.textContent = `Question ${current + 1} of ${examData.length}`;
+  questionEl.innerHTML = q.q;
+  optionsEl.innerHTML = "";
+
+  prevBtn.disabled = current === 0;
+
+  let optionsToRender;
+
+  if (shuffledOptions[current] === null) {
+    optionsToRender = q.o.map((text, index) => ({
+      text,
+      originalIndex: index
+    }));
+
+    shuffleArray(optionsToRender);
+    shuffledOptions[current] = optionsToRender;
+  } else {
+    optionsToRender = shuffledOptions[current];
+  }
+
+  optionsToRender.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.textContent = opt.text;
+
+    if (answers[current] !== null) {
+      btn.disabled = true;
+
+      if (opt.originalIndex === q.a) {
+        btn.classList.add("correct");
+      }
+
+      if (
+        opt.originalIndex === answers[current] &&
+        answers[current] !== q.a
+      ) {
+        btn.classList.add("wrong");
+      }
+    }
+
+    btn.onclick = () => selectAnswer(opt.originalIndex);
+    optionsEl.appendChild(btn);
+  });
+}
+
+function selectAnswer(index) {
+  if (answers[current] !== null) return;
+
+  answers[current] = index;
+  if (index === examData[current].a) score++;
+
+  loadQuestion();
+}
+
+nextBtn.onclick = () => {
+  if (current < examData.length - 1) {
+    current++;
+    loadQuestion();
+  } else {
+    showResult();
+  }
+};
+
+prevBtn.onclick = () => {
+  if (current > 0) {
+    current--;
+    loadQuestion();
+  }
+};
+
+function showResult() {
+  questionEl.style.display = "none";
+  optionsEl.style.display = "none";
+  counterEl.style.display = "none";
+  document.querySelector(".nav-buttons").style.display = "none";
+
+  const percentage = ((score / examData.length) * 100).toFixed(2);
+  resultEl.style.display = "block";
+  restartBtn.style.display ="block";
+
+  resultEl.innerHTML = `
+    <p><strong>Quiz Completed</strong></p>
+    <p>Score: ${score} / ${examData.length}</p>
+    <p>Percentage: ${percentage}%</p>
+  `;
+}
+
+restartBtn.onclick = () => {
+  current = 0;
+  score = 0;
+
+  const newExamData = pickRandomQuestions(quizData, 60);
+  examData.length = 0;
+  examData.push(...newExamData);
+
+  answers = new Array(examData.length).fill(null);
+  shuffledOptions = new Array(examData.length).fill(null);
+
+  questionEl.style.display = "block";
+  optionsEl.style.display = "block";
+  counterEl.style.display = "block";
+  document.querySelector(".nav-buttons").style.display = "flex";
+  resultEl.style.display = "none";
+  restartBtn.style.display = "none";
+
+  prevBtn.disabled = true;
+  nextBtn.disabled = false;
+
+  loadQuestion();
+};
+
+loadQuestion();
+</script>
+
+</body>
+</html>
